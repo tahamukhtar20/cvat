@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import Icon from '@ant-design/icons';
 
 import { MergeIcon } from 'icons';
@@ -11,7 +11,7 @@ import { Canvas } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import { ActiveControl, CombinedState } from 'reducers';
 import CVATTooltip from 'components/common/cvat-tooltip';
-import GlobalHotKeys, { KeyMapItem } from 'utils/mousetrap-react';
+import GlobalHotKeys from 'utils/mousetrap-react';
 import { registerComponentShortcuts } from 'actions/shortcuts-actions';
 import { ShortcutScope } from 'utils/enums';
 import { useSelector } from 'react-redux';
@@ -71,26 +71,26 @@ function MergeControl(props: Props): JSX.Element {
         dynamicIconProps.onClick();
     };
 
-    const handlers: Partial<Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void>> = {};
-    const currentComponentShortcuts: Record<string, KeyMapItem> = {};
-    if (canvasInstance instanceof Canvas) {
-        handlers.SWITCH_MERGE_MODE_STANDARD_CONTROLS = handleMergeMode;
-        currentComponentShortcuts.SWITCH_MERGE_MODE_STANDARD_CONTROLS =
-            componentShortcuts.SWITCH_MERGE_MODE_STANDARD_CONTROLS;
-    }
-
-    if (canvasInstance instanceof Canvas3d) {
-        handlers.SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS = handleMergeMode;
-        currentComponentShortcuts.SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS =
-            componentShortcuts.SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS;
-    }
+    const handlers: any = useCallback((): Record<string, (event: KeyboardEvent) => void> | null => {
+        if (canvasInstance instanceof Canvas) {
+            return {
+                SWITCH_MERGE_MODE_STANDARD_CONTROLS: handleMergeMode,
+            };
+        }
+        if (canvasInstance instanceof Canvas3d) {
+            return {
+                SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS: handleMergeMode,
+            };
+        }
+        return null;
+    }, [canvasInstance]);
 
     return disabled ? (
         <Icon className='cvat-merge-control cvat-disabled-canvas-control' component={MergeIcon} />
     ) : (
         <>
             <GlobalHotKeys
-                keyMap={subKeyMap(currentComponentShortcuts, keyMap)}
+                keyMap={subKeyMap(componentShortcuts, keyMap)}
                 handlers={handlers}
             />
             <CVATTooltip title={`Merge shapes/tracks ${normalizedKeyMap.SWITCH_MERGE_MODE_STANDARD_CONTROLS}`} placement='right'>

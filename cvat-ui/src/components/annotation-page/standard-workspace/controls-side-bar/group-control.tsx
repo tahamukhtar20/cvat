@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import Icon from '@ant-design/icons';
 
 import { GroupIcon } from 'icons';
@@ -11,7 +11,7 @@ import { Canvas } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import { ActiveControl, CombinedState } from 'reducers';
 import CVATTooltip from 'components/common/cvat-tooltip';
-import GlobalHotKeys, { KeyMapItem } from 'utils/mousetrap-react';
+import GlobalHotKeys from 'utils/mousetrap-react';
 import { ShortcutScope } from 'utils/enums';
 import { registerComponentShortcuts } from 'actions/shortcuts-actions';
 import { subKeyMap } from 'utils/component-subkeymap';
@@ -99,22 +99,21 @@ function GroupControl(props: Props): JSX.Element {
         updateActiveControl(ActiveControl.CURSOR);
     };
 
-    const handlers: Partial<Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void>> = {};
-    const currentComponentShortcuts: Record<string, KeyMapItem> = {};
-
-    if (canvasInstance instanceof Canvas) {
-        handlers.SWITCH_GROUP_MODE_STANDARD_CONTROLS = handleSwitchGroupMode;
-        handlers.RESET_GROUP_STANDARD_CONTROLS = handleResetGroup;
-        currentComponentShortcuts.SWITCH_GROUP_MODE_STANDARD_CONTROLS =
-            componentShortcuts.SWITCH_GROUP_MODE_STANDARD_CONTROLS;
-        currentComponentShortcuts.RESET_GROUP_STANDARD_CONTROLS =
-            componentShortcuts.RESET_GROUP_STANDARD_CONTROLS;
-    }
-
-    if (canvasInstance instanceof Canvas3d) {
-        handlers.SWITCH_GROUP_MODE_STANDARD_3D_CONTROLS = handleSwitchGroupMode;
-        handlers.RESET_GROUP_STANDARD_3D_CONTROLS = handleResetGroup;
-    }
+    const handlers: any = useCallback((): Record<string, (event: KeyboardEvent) => void> | null => {
+        if (canvasInstance instanceof Canvas) {
+            return {
+                SWITCH_GROUP_MODE_STANDARD_CONTROLS: handleSwitchGroupMode,
+                RESET_GROUP_STANDARD_CONTROLS: handleResetGroup,
+            };
+        }
+        if (canvasInstance instanceof Canvas3d) {
+            return {
+                SWITCH_GROUP_MODE_STANDARD_3D_CONTROLS: handleSwitchGroupMode,
+                RESET_GROUP_STANDARD_3D_CONTROLS: handleResetGroup,
+            };
+        }
+        return null;
+    }, [canvasInstance]);
 
     const title = [
         `Group shapes/tracks ${normalizedKeyMap.SWITCH_GROUP_MODE_STANDARD_CONTROLS}`,
@@ -126,7 +125,7 @@ function GroupControl(props: Props): JSX.Element {
     ) : (
         <>
             <GlobalHotKeys
-                keyMap={subKeyMap(currentComponentShortcuts, keyMap)}
+                keyMap={subKeyMap(componentShortcuts, keyMap)}
                 handlers={handlers}
             />
             <CVATTooltip title={title} placement='right'>
