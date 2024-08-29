@@ -99,12 +99,17 @@ function GroupControl(props: Props): JSX.Element {
         updateActiveControl(ActiveControl.CURSOR);
     };
 
-    const handlers: Partial<Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void>> = {
-        SWITCH_GROUP_MODE_STANDARD_CONTROLS: handleSwitchGroupMode,
-        RESET_GROUP_STANDARD_CONTROLS: handleResetGroup,
-        SWITCH_GROUP_MODE_STANDARD_3D_CONTROLS: handleSwitchGroupMode,
-        RESET_GROUP_STANDARD_3D_CONTROLS: handleResetGroup,
-    };
+    const handlers: Partial<Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void>> = {};
+
+    if (canvasInstance instanceof Canvas) {
+        handlers.SWITCH_GROUP_MODE_STANDARD_CONTROLS = handleSwitchGroupMode;
+        handlers.RESET_GROUP_STANDARD_CONTROLS = handleResetGroup;
+    }
+
+    if (canvasInstance instanceof Canvas3d) {
+        handlers.SWITCH_GROUP_MODE_STANDARD_3D_CONTROLS = handleSwitchGroupMode;
+        handlers.RESET_GROUP_STANDARD_3D_CONTROLS = handleResetGroup;
+    }
 
     const title = [
         `Group shapes/tracks ${normalizedKeyMap.SWITCH_GROUP_MODE_STANDARD_CONTROLS}`,

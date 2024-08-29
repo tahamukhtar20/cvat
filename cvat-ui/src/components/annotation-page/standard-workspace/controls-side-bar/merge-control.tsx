@@ -71,10 +71,15 @@ function MergeControl(props: Props): JSX.Element {
         dynamicIconProps.onClick();
     };
 
-    const handlers: Partial<Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void>> = {
-        SWITCH_MERGE_MODE_STANDARD_CONTROLS: handleMergeMode,
-        SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS: handleMergeMode,
-    };
+    const handlers: Partial<Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void>> = {};
+
+    if (canvasInstance instanceof Canvas) {
+        handlers.SWITCH_MERGE_MODE_STANDARD_CONTROLS = handleMergeMode;
+    }
+
+    if (canvasInstance instanceof Canvas3d) {
+        handlers.SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS = handleMergeMode;
+    }
 
     return disabled ? (
         <Icon className='cvat-merge-control cvat-disabled-canvas-control' component={MergeIcon} />
