@@ -11,7 +11,7 @@ import { Canvas } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import { ActiveControl, CombinedState } from 'reducers';
 import CVATTooltip from 'components/common/cvat-tooltip';
-import GlobalHotKeys from 'utils/mousetrap-react';
+import GlobalHotKeys, { KeyMapItem } from 'utils/mousetrap-react';
 import { ShortcutScope } from 'utils/enums';
 import { registerComponentShortcuts } from 'actions/shortcuts-actions';
 import { subKeyMap } from 'utils/component-subkeymap';
@@ -100,10 +100,15 @@ function GroupControl(props: Props): JSX.Element {
     };
 
     const handlers: Partial<Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void>> = {};
+    const currentComponentShortcuts: Record<string, KeyMapItem> = {};
 
     if (canvasInstance instanceof Canvas) {
         handlers.SWITCH_GROUP_MODE_STANDARD_CONTROLS = handleSwitchGroupMode;
         handlers.RESET_GROUP_STANDARD_CONTROLS = handleResetGroup;
+        currentComponentShortcuts.SWITCH_GROUP_MODE_STANDARD_CONTROLS =
+            componentShortcuts.SWITCH_GROUP_MODE_STANDARD_CONTROLS;
+        currentComponentShortcuts.RESET_GROUP_STANDARD_CONTROLS =
+            componentShortcuts.RESET_GROUP_STANDARD_CONTROLS;
     }
 
     if (canvasInstance instanceof Canvas3d) {
@@ -121,7 +126,7 @@ function GroupControl(props: Props): JSX.Element {
     ) : (
         <>
             <GlobalHotKeys
-                keyMap={subKeyMap(componentShortcuts, keyMap)}
+                keyMap={subKeyMap(currentComponentShortcuts, keyMap)}
                 handlers={handlers}
             />
             <CVATTooltip title={title} placement='right'>

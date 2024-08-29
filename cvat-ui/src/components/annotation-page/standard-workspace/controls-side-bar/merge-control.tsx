@@ -11,7 +11,7 @@ import { Canvas } from 'cvat-canvas-wrapper';
 import { Canvas3d } from 'cvat-canvas3d-wrapper';
 import { ActiveControl, CombinedState } from 'reducers';
 import CVATTooltip from 'components/common/cvat-tooltip';
-import GlobalHotKeys from 'utils/mousetrap-react';
+import GlobalHotKeys, { KeyMapItem } from 'utils/mousetrap-react';
 import { registerComponentShortcuts } from 'actions/shortcuts-actions';
 import { ShortcutScope } from 'utils/enums';
 import { useSelector } from 'react-redux';
@@ -72,13 +72,17 @@ function MergeControl(props: Props): JSX.Element {
     };
 
     const handlers: Partial<Record<keyof typeof componentShortcuts, (event?: KeyboardEvent) => void>> = {};
-
+    const currentComponentShortcuts: Record<string, KeyMapItem> = {};
     if (canvasInstance instanceof Canvas) {
         handlers.SWITCH_MERGE_MODE_STANDARD_CONTROLS = handleMergeMode;
+        currentComponentShortcuts.SWITCH_MERGE_MODE_STANDARD_CONTROLS =
+            componentShortcuts.SWITCH_MERGE_MODE_STANDARD_CONTROLS;
     }
 
     if (canvasInstance instanceof Canvas3d) {
         handlers.SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS = handleMergeMode;
+        currentComponentShortcuts.SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS =
+            componentShortcuts.SWITCH_MERGE_MODE_STANDARD_3D_CONTROLS;
     }
 
     return disabled ? (
@@ -86,7 +90,7 @@ function MergeControl(props: Props): JSX.Element {
     ) : (
         <>
             <GlobalHotKeys
-                keyMap={subKeyMap(componentShortcuts, keyMap)}
+                keyMap={subKeyMap(currentComponentShortcuts, keyMap)}
                 handlers={handlers}
             />
             <CVATTooltip title={`Merge shapes/tracks ${normalizedKeyMap.SWITCH_MERGE_MODE_STANDARD_CONTROLS}`} placement='right'>
